@@ -1,172 +1,186 @@
-![ComfyUI Worker Banner](https://cpjrphpz3t5wbwfe.public.blob.vercel-storage.com/worker-comfyui_banner-CDZ6JIEByEePozCT1ZrmeVOsN5NX3U.jpeg)
+# VibeVoice TTS RunPod Deployment
 
----
+This directory contains the configuration files and documentation for deploying the VibeVoice TTS worker on RunPod serverless platform.
 
-Run [ComfyUI](https://github.com/comfyanonymous/ComfyUI) workflows as a serverless endpoint.
+## Quick Start
 
----
+### Prerequisites
+- RunPod account with serverless access
+- Docker registry access (Docker Hub, ECR, etc.)
+- Hugging Face token (for model downloads)
 
-[![RunPod](https://api.runpod.io/badge/runpod-workers/worker-comfyui)](https://www.runpod.io/console/hub/runpod-workers/worker-comfyui)
+### Deployment Steps
 
----
+1. **Configure Environment**
+   ```bash
+   # Set your environment variables
+   export HF_TOKEN="your_huggingface_token"
+   export DOCKER_REGISTRY="your-registry.com"
+   ```
 
-## What is included?
+2. **Run Deployment Script**
+   ```bash
+   cd scripts
+   python deploy_runpod.py --registry $DOCKER_REGISTRY
+   ```
 
-This worker comes with the **FLUX.1-dev-fp8** (`flux1-dev-fp8.safetensors`) model pre-installed and works only with this model when deployed from the hub. If you want to use a different model, you have to [deploy the endpoint](https://github.com/runpod-workers/worker-comfyui/blob/main/docs/deployment.md) using one of these pre-defined Docker images:
+3. **Verify Deployment**
+   - Check RunPod dashboard for endpoint status
+   - Run tests using the provided test configurations
 
-- `runpod/worker-comfyui:<version>-base` - Clean ComfyUI install with no models
-- `runpod/worker-comfyui:<version>-flux1-schnell` - FLUX.1 schnell model
-- `runpod/worker-comfyui:<version>-flux1-dev` - FLUX.1 dev model
-- `runpod/worker-comfyui:<version>-sdxl` - Stable Diffusion XL model
-- `runpod/worker-comfyui:<version>-sd3` - Stable Diffusion 3 medium model
+## Configuration Files
 
-Replace `<version>` with the latest release version from [GitHub Releases](https://github.com/runpod-workers/worker-comfyui/releases)
+### hub.json
+Main deployment configuration for RunPod serverless:
+- **GPU**: RTX 4090 (24GB VRAM) or RTX 3090 (24GB VRAM)
+- **Memory**: 50GB container disk
+- **Scaling**: Auto-scaling with min 1, max 5 instances
+- **Environment**: Configurable model cache and network volume settings
 
-If you need a different model or you have a LoRA or need custom nodes, then please follow our [Customization Guide](https://github.com/runpod-workers/worker-comfyui/blob/main/docs/customization.md) to create your own custom worker.
+### tests.json
+Test configurations for TTS functionality:
+- Basic TTS generation test
+- Reference audio voice cloning test
+- Performance validation tests
 
-## Usage
+### deployment.json (Generated)
+Complete deployment configuration with:
+- Docker image reference
+- Scaling policies
+- Network volume mounts
+- Environment variables
 
-The worker accepts the following input parameters:
+## Optimization Features
 
-| Parameter  | Type     | Default | Required | Description                                                                                                                                                                                                                                    |
-| :--------- | :------- | :------ | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `workflow` | `object` | `None`  | **Yes**  | The entire ComfyUI workflow in the API JSON format. See the main project [README.md](https://github.com/runpod-workers/worker-comfyui#how-to-get-the-workflow-from-comfyui) for instructions on how to export this from the ComfyUI interface. |
-| `images`   | `array`  | `[]`    | No       | An optional array of input images. Each image object should contain `name` (string, required, filename to reference in the workflow) and `image` (string, required, base64-encoded image data).                                                |
+### Auto-Scaling Configuration
+- **Min Instances**: 1 (cost optimization)
+- **Max Instances**: 5 (high-throughput)
+- **Target Concurrency**: 2 requests per instance
+- **Scale-up Threshold**: 80% utilization
+- **Scale-down Threshold**: 30% utilization
 
-> [!NOTE]
-> The `input.images` array has specific size constraints based on RunPod API limits (10MB for `/run`, 20MB for `/runsync`). See the main [README.md](https://github.com/runpod-workers/worker-comfyui#inputimages) for details.
+### Caching Strategies
+- **Model Cache**: 25GB LRU cache for TTS models
+- **Dependency Cache**: Pip, conda, and HuggingFace caches
+- **Workflow Cache**: Intermediate result caching
+- **Network Cache**: HTTP and DNS caching
 
-### Example Request
+### VRAM Optimization
+- **Memory Efficient Loading**: Automatic device mapping
+- **Mixed Precision**: FP16 inference
+- **Flash Attention**: Optimized attention mechanisms
+- **Dynamic Batching**: Adaptive batch processing
 
-This example uses a simplified workflow (replace with your actual workflow JSON).
+### Network Volumes
+- **Model Storage**: 100GB persistent volume for models
+- **Cache Storage**: 50GB fast storage for caches
+- **Output Storage**: 25GB for generated audio files
+- **Config Storage**: 5GB for configuration files
 
-```json
-{
-  "input": {
-    "workflow": {
-      "6": {
-        "inputs": {
-          "text": "anime cat with massive fluffy fennec ears and a big fluffy tail blonde messy long hair blue eyes wearing a construction outfit placing a fancy black forest cake with candles on top of a dinner table of an old dark Victorian mansion lit by candlelight with a bright window to the foggy forest and very expensive stuff everywhere there are paintings on the walls",
-          "clip": ["30", 1]
-        },
-        "class_type": "CLIPTextEncode",
-        "_meta": {
-          "title": "CLIP Text Encode (Positive Prompt)"
-        }
-      },
-      "8": {
-        "inputs": {
-          "samples": ["31", 0],
-          "vae": ["30", 2]
-        },
-        "class_type": "VAEDecode",
-        "_meta": {
-          "title": "VAE Decode"
-        }
-      },
-      "9": {
-        "inputs": {
-          "filename_prefix": "ComfyUI",
-          "images": ["8", 0]
-        },
-        "class_type": "SaveImage",
-        "_meta": {
-          "title": "Save Image"
-        }
-      },
-      "27": {
-        "inputs": {
-          "width": 512,
-          "height": 512,
-          "batch_size": 1
-        },
-        "class_type": "EmptySD3LatentImage",
-        "_meta": {
-          "title": "EmptySD3LatentImage"
-        }
-      },
-      "30": {
-        "inputs": {
-          "ckpt_name": "flux1-dev-fp8.safetensors"
-        },
-        "class_type": "CheckpointLoaderSimple",
-        "_meta": {
-          "title": "Load Checkpoint"
-        }
-      },
-      "31": {
-        "inputs": {
-          "seed": 243057879077961,
-          "steps": 10,
-          "cfg": 1,
-          "sampler_name": "euler",
-          "scheduler": "simple",
-          "denoise": 1,
-          "model": ["30", 0],
-          "positive": ["35", 0],
-          "negative": ["33", 0],
-          "latent_image": ["27", 0]
-        },
-        "class_type": "KSampler",
-        "_meta": {
-          "title": "KSampler"
-        }
-      },
-      "33": {
-        "inputs": {
-          "text": "",
-          "clip": ["30", 1]
-        },
-        "class_type": "CLIPTextEncode",
-        "_meta": {
-          "title": "CLIP Text Encode (Negative Prompt)"
-        }
-      },
-      "35": {
-        "inputs": {
-          "guidance": 3.5,
-          "conditioning": ["6", 0]
-        },
-        "class_type": "FluxGuidance",
-        "_meta": {
-          "title": "FluxGuidance"
-        }
-      },
-      "38": {
-        "inputs": {
-          "images": ["8", 0]
-        },
-        "class_type": "PreviewImage",
-        "_meta": {
-          "title": "Preview Image"
-        }
-      },
-      "40": {
-        "inputs": {
-          "filename_prefix": "ComfyUI",
-          "images": ["8", 0]
-        },
-        "class_type": "SaveImage",
-        "_meta": {
-          "title": "Save Image"
-        }
-      }
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `REFRESH_WORKER` | Clean state after each job | `false` |
+| `MODEL_CACHE_SIZE` | Model cache size in GB | `20` |
+| `ENABLE_NETWORK_VOLUME` | Use persistent storage | `true` |
+| `AUTO_SCALE_MIN` | Minimum instances | `1` |
+| `AUTO_SCALE_MAX` | Maximum instances | `5` |
+
+## Monitoring & Metrics
+
+### Performance Metrics
+- Inference time per request
+- GPU utilization percentage
+- Memory usage (VRAM/RAM)
+- Cache hit/miss rates
+
+### Health Checks
+- Model loading status
+- GPU memory availability
+- Network connectivity
+- Disk space monitoring
+
+## Testing
+
+### Local Testing
+```bash
+# Run basic TTS test
+curl -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": {
+      "text": "Hello, world!",
+      "temperature": 0.8,
+      "speed": 1.0,
+      "seed": 42
     }
-  }
-}
+  }'
 ```
 
-### Example Response
+### RunPod Testing
+Use the provided `tests.json` configuration in RunPod dashboard or CLI.
 
-```json
-{
-  "delayTime": 2188,
-  "executionTime": 2297,
-  "id": "sync-c0cd1eb2-068f-4ecf-a99a-55770fc77391-e1",
-  "output": {
-    "message": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zU...",
-    "status": "success"
-  },
-  "status": "COMPLETED"
-}
-```
+## Troubleshooting
+
+### Common Issues
+
+**High Latency**
+- Check GPU utilization
+- Verify model cache is working
+- Monitor network volume performance
+
+**Out of Memory**
+- Reduce batch size in configuration
+- Enable gradient checkpointing
+- Check for memory leaks in workflow
+
+**Model Loading Failures**
+- Verify HuggingFace token
+- Check network volume permissions
+- Ensure sufficient disk space
+
+### Logs & Debugging
+- Enable debug logging in environment variables
+- Check RunPod dashboard for instance logs
+- Monitor GPU metrics in real-time
+
+## Performance Tuning
+
+### For Cost Optimization
+- Set lower auto-scaling thresholds
+- Use smaller batch sizes
+- Enable more aggressive caching
+
+### For High Throughput
+- Increase max instances
+- Use larger batch sizes
+- Optimize model loading strategies
+
+### For Low Latency
+- Pre-load models on startup
+- Use faster storage options
+- Optimize network configuration
+
+## Security Considerations
+
+- Store HuggingFace tokens securely
+- Use encrypted network volumes
+- Implement proper access controls
+- Regular security updates for base images
+
+## Additional Resources
+
+- [RunPod Documentation](https://docs.runpod.io/)
+- [ComfyUI Documentation](https://docs.comfy.org/)
+- [VibeVoice Model Documentation](https://github.com/aoi-ot/VibeVoice)
+
+## Support
+
+For issues specific to this deployment:
+1. Check the troubleshooting section above
+2. Review RunPod serverless logs
+3. Verify configuration files are correct
+4. Test with minimal configuration first
+
+For VibeVoice or ComfyUI issues, refer to their respective documentation and communities.

@@ -5,9 +5,9 @@ import os
 import json
 import base64
 
-# Make sure that "src" is known and can be used to import handler.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
-from src import handler
+# Import handler from the root directory
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import handler
 
 # Local folder for test resources
 RUNPOD_WORKER_COMFY_TEST_RESOURCES_IMAGES = "./test_resources/images"

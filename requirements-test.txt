@@ -1,0 +1,25 @@
+# Testing dependencies for RunPod worker
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0
+pytest-timeout>=2.1.0
+coverage>=7.0.0
+unittest-mock>=0.2.0
+
+# Audio testing dependencies
+numpy>=1.21.0
+scipy>=1.7.0
+
+# Mock and fixtures
+responses>=0.23.0
+freezegun>=1.2.0
+
+# Performance testing
+pytest-benchmark>=4.0.0
+
+# Code quality (optional but recommended)
+black>=22.0.0
+isort>=5.10.0
+flake8>=4.0.0
+mypy>=1.0.0

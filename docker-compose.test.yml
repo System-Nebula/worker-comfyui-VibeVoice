@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  comfyui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8188:8188"
+    volumes:
+      - ./workflows:/workspace/ComfyUI/workflows
+      - ./input:/workspace/ComfyUI/input
+      - ./output:/workspace/ComfyUI/output
+      - comfyui_models:/workspace/ComfyUI/models
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - TORCH_USE_CUDA_DSA=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      comfyui:
+        condition: service_healthy
+    volumes:
+      - .:/workspace
+      - ./tests:/workspace/tests
+      - ./test_resources:/workspace/test_resources
+    environment:
+      - COMFYUI_URL=http://comfyui:8188
+      - TEST_MODE=integration
+    command: ["python", "-m", "pytest", "tests/", "-v", "--tb=short"]
+
+volumes:
+  comfyui_models:

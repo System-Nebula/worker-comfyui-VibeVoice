@@ -1,15 +1,17 @@
 {
-  "title": "ComfyUI",
-  "description": "Generate images with ComfyUI using FLUX.1-dev (fp8)",
+  "title": "VibeVoice TTS",
+  "description": "Generate high-quality text-to-speech audio using VibeVoice models with ComfyUI",
   "type": "serverless",
-  "category": "image",
+  "category": "audio",
   "iconUrl": "https://cpjrphpz3t5wbwfe.public.blob.vercel-storage.com/comfyui-logo-zpFUpCZoYMn5L0Ea9hfYOKX6F9gYqx.png",
   "config": {
     "runsOn": "GPU",
-    "containerDiskInGb": 20,
-    "gpuIds": "ADA_24",
+    "containerDiskInGb": 50,
+    "gpuIds": "RTX_4090",
     "gpuCount": 1,
     "allowedCudaVersions": ["12.7", "12.6"],
+    "minVram": 8192,
+    "maxVram": 24576,
     "env": [
       {
         "key": "REFRESH_WORKER",
@@ -18,6 +20,48 @@
           "type": "boolean",
           "description": "When enabled, the worker will stop after each finished job to have a clean state",
           "default": false
+        }
+      },
+      {
+        "key": "MODEL_CACHE_SIZE",
+        "input": {
+          "name": "Model Cache Size (GB)",
+          "type": "number",
+          "description": "Maximum size of model cache in GB",
+          "default": 20,
+          "min": 5,
+          "max": 50
+        }
+      },
+      {
+        "key": "ENABLE_NETWORK_VOLUME",
+        "input": {
+          "name": "Enable Network Volume",
+          "type": "boolean",
+          "description": "Use network volume for persistent model storage",
+          "default": true
+        }
+      },
+      {
+        "key": "AUTO_SCALE_MIN",
+        "input": {
+          "name": "Min Auto-scale Instances",
+          "type": "number",
+          "description": "Minimum number of instances for auto-scaling",
+          "default": 1,
+          "min": 1,
+          "max": 10
+        }
+      },
+      {
+        "key": "AUTO_SCALE_MAX",
+        "input": {
+          "name": "Max Auto-scale Instances",
+          "type": "number",
+          "description": "Maximum number of instances for auto-scaling",
+          "default": 5,
+          "min": 1,
+          "max": 20
         }
       }
     ]

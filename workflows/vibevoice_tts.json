@@ -1,0 +1,130 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "PrimitiveNode",
+      "pos": [200, 100],
+      "size": {"0": 210, "1": 58},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "STRING", "type": "STRING", "links": [1], "slot_index": 0}],
+      "properties": {"default": "Hello, this is a test text for TTS generation.", "multiline": false},
+      "widgets_values": ["Hello, this is a test text for TTS generation."]
+    },
+    {
+      "id": 2,
+      "type": "LoadAudio",
+      "pos": [200, 200],
+      "size": {"0": 315, "1": 58},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "AUDIO", "type": "AUDIO", "links": [2], "slot_index": 0}],
+      "properties": {"audio_path": "maya.wav"},
+      "widgets_values": ["maya.wav"]
+    },
+    {
+      "id": 3,
+      "type": "PrimitiveNode",
+      "pos": [200, 300],
+      "size": {"0": 210, "1": 58},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "FLOAT", "type": "FLOAT", "links": [3], "slot_index": 0}],
+      "properties": {"default": 0.8, "min": 0.0, "max": 2.0, "step": 0.1},
+      "widgets_values": [0.8]
+    },
+    {
+      "id": 4,
+      "type": "PrimitiveNode",
+      "pos": [200, 400],
+      "size": {"0": 210, "1": 58},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "FLOAT", "type": "FLOAT", "links": [4], "slot_index": 0}],
+      "properties": {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.1},
+      "widgets_values": [1.0]
+    },
+    {
+      "id": 5,
+      "type": "PrimitiveNode",
+      "pos": [200, 500],
+      "size": {"0": 210, "1": 58},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "INT", "type": "INT", "links": [5], "slot_index": 0}],
+      "properties": {"default": 42, "min": 0, "max": 1000000, "step": 1},
+      "widgets_values": [42]
+    },
+    {
+      "id": 6,
+      "type": "VibeVoiceLoader",
+      "pos": [500, 100],
+      "size": {"0": 315, "1": 58},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "MODEL", "type": "VIBEVOICE_MODEL", "links": [6], "slot_index": 0}],
+      "properties": {"model_name": "VibeVoice-Large"},
+      "widgets_values": ["VibeVoice-Large"]
+    },
+    {
+      "id": 7,
+      "type": "VibeVoiceTTS",
+      "pos": [500, 300],
+      "size": {"0": 315, "1": 200},
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "VIBEVOICE_MODEL", "link": 6},
+        {"name": "text", "type": "STRING", "link": 1},
+        {"name": "ref_audio", "type": "AUDIO", "link": 2},
+        {"name": "temperature", "type": "FLOAT", "link": 3},
+        {"name": "speed", "type": "FLOAT", "link": 4},
+        {"name": "seed", "type": "INT", "link": 5}
+      ],
+      "outputs": [{"name": "AUDIO", "type": "AUDIO", "links": [7], "slot_index": 0}],
+      "properties": {},
+      "widgets_values": []
+    },
+    {
+      "id": 8,
+      "type": "SaveAudio",
+      "pos": [900, 300],
+      "size": {"0": 315, "1": 58},
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [{"name": "audio", "type": "AUDIO", "link": 7}],
+      "outputs": [],
+      "properties": {"filename_prefix": "vibevoice_output"},
+      "widgets_values": ["vibevoice_output"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 7, 1, "STRING"],
+    [2, 2, 0, 7, 2, "AUDIO"],
+    [3, 3, 0, 7, 3, "FLOAT"],
+    [4, 4, 0, 7, 4, "FLOAT"],
+    [5, 5, 0, 7, 5, "INT"],
+    [6, 6, 0, 7, 0, "VIBEVOICE_MODEL"],
+    [7, 7, 0, 8, 0, "AUDIO"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

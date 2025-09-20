@@ -180,6 +180,7 @@ To get the correct `workflow` JSON for the API:
 
 ## Further Documentation
 
+- **[Instructions](docs/INSTRUCTIONS.md):** A summary of key takeaways for building custom ComfyUI RunPod workers.
 - **[Deployment Guide](docs/deployment.md):** Detailed steps for deploying on RunPod.
 - **[Configuration Guide](docs/configuration.md):** Full list of environment variables (including S3 setup).
 - **[Customization Guide](docs/customization.md):** Adding custom models and nodes (Network Volumes, Docker builds).

@@ -128,3 +128,24 @@ For enhanced local development and end-to-end testing, you can start a local env
 
 - Press `Ctrl+C` in the terminal where `docker-compose up` is running.
 - To ensure containers are removed, you can run: `docker-compose down`
+
+### Key Takeaways for Building Custom ComfyUI RunPod Workers
+
+**1. Serverless Fundamentals:**
+*   **Serverless computing** allows you to deploy applications without managing the underlying infrastructure. While servers are still used, the cloud provider handles their management, allowing you to focus on your code.
+*   **Workers** are the individual computing environments that execute your tasks. You can configure the number of workers to handle your workload.
+*   A **cold start** occurs when a new worker has to be initialized to handle a request, which can add latency. You can mitigate this by configuring a certain number of "active workers" that are always on and ready to process requests.
+
+**2. Building Your Endpoint:**
+*   You have two primary options for deploying a custom endpoint on RunPod:
+    *   **Docker Image**: Deploy a pre-built Docker image from a registry.
+    *   **GitHub Repo**: Deploy directly from a GitHub repository containing your `Dockerfile` and other necessary files.
+
+**3. Custom Image Essentials:**
+*   To create a custom image, you will primarily need two key files:
+    *   **`Dockerfile`**: This file contains the instructions to build your Docker image, including the base image, dependencies, and commands to run.
+    *   **`handler.py`**: This Python script contains the logic for handling incoming API requests, processing them, and returning the results.
+
+*   **Customization:** When building custom images, you have the flexibility to create a unique setup tailored to your specific needs, which is ideal if the standard options don't meet your requirements.
+
+*   **Technical Process:** Building custom images is a more technical process. It involves defining all the necessary configurations in your `Dockerfile` and `handler.py` to ensure your ComfyUI workflow runs correctly. The handler is responsible for loading models and processing API requests.

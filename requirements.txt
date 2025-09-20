@@ -1,4 +1,10 @@
-# fix some problems with the queue
-runpod~=1.7.12
-websocket-client
+runpod
+torch
+torchaudio
+soundfile
+librosa
+comfyui
+websockets
 requests
+pydantic
+# Add other dependencies as needed
